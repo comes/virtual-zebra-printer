@@ -44,7 +44,7 @@ Virtual Zebra Printer is a lightweight Node.js application that straight forward
    for development:
 
    ```bash
-   npm run dev
+   npm dev
    ```
 
 ## API Endpoints
