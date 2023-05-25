@@ -69,9 +69,7 @@ app.post("/read", (_, res) => {
   console.log(
     "Last command:",
     lastCommand
-      .replace(/\n/g, "\\n")
-      .replace(/\r/g, "\\r")
-      .replace(/\t/g, "\\t")
+      .replace(/\/g, "\\");
   );
   let responseStr = "";
   if (lastCommand === "^XA^HH^XZ") {
