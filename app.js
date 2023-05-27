@@ -3,14 +3,18 @@ import * as dotenv from "dotenv";
 import express from "express";
 import fetch from "node-fetch";
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const app = express();
 dotenv.config();
 app.use(cors());
 app.use(express.json({ type: "*/*" }));
 
-const fakePrinter = {
+const fakeDefaultPrinter = {
     deviceType: "printer",
-    uid: "127.0.0.1:9102",
+    uid: 'default-fake-printer',
     provider: "com.zebra.ds.webdriver.desktop.provider.DefaultDeviceProvider",
     name: "fake printer",
     connection: "network",
@@ -32,19 +36,32 @@ function virtualPrint(zpl) {
 
 app.get("/default", (_, res) => {
   console.log("GET /default");
-  res.json(fakePrinter);
+  sleep(250).then(() => res.json(fakeDefaultPrinter));
 });
 
 app.get("/available", (_, res) => {
   console.log("GET /available");
-  res.json({
-    printer: [fakePrinter]
-  });
+  let data = {
+    printer: [fakeDefaultPrinter, Object.assign({}, fakeDefaultPrinter),Object.assign({}, fakeDefaultPrinter)].map((printer, idx) => {
+      if (idx === 0) {
+        return printer;
+      }
+
+      printer.name += `_${idx}`;
+      printer.uid = 'printer-xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      })
+      return printer;
+    })
+  };
+
+  sleep(250).then(() => res.json(data));
 });
 
 app.get("/config", (_, res) => {
   console.log("GET /config");
-  res.json({
+  let data = {
     application: {
       supportedConversions: {
         jpg: ["cpcl", "zpl", "kpl"],
@@ -61,7 +78,8 @@ app.get("/config", (_, res) => {
       buildNumber: 421,
       platform: "macos",
     },
-  });
+  };
+  sleep(250).then(() => res.json(data));
 });
 
 app.post("/read", (_, res) => {
@@ -136,7 +154,8 @@ app.post("/read", (_, res) => {
   }
 
   lastCommand = "";
-  res.status(200).send(responseStr);
+
+  sleep(250).then(() => res.send(responseStr));
 });
 
 app.post("/write", (req, res) => {
@@ -156,7 +175,7 @@ app.post("/write", (req, res) => {
   if (lastCommand.startsWith('^xa') && process.env.CHROME_EXTENSION_ENABLED === String(true)) {
     virtualPrint(lastCommand);
   }
-  res.send({});
+  sleep(250).then(() => res.send({}));
 });
 
 const SERVER_PORT = 9100;
