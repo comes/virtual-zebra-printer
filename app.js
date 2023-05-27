@@ -69,7 +69,7 @@ app.post("/read", (_, res) => {
   console.log(
     "Last command:",
     lastCommand
-      .replace(/\/g, "\\");
+      .replace(/\\/g, "\\\\")
   );
   let responseStr = "";
   if (lastCommand === "^XA^HH^XZ") {
